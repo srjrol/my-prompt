@@ -1,0 +1,77 @@
+name: Validate Prompt Submissions
+
+on:
+  pull_request:
+    branches:
+      - main  # Run on PRs targeting the main branch
+    paths:
+      - 'prompts/**'  # Only run when files in the prompts directory are changed
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install Dependencies
+        run: |
+          npm install -g ajv-cli handlebars
+
+      - name: Validate Prompt JSON
+        run: |
+          for file in prompts/*/prompt.json; do
+            echo "Validating $file..."
+            ajv validate -s schemas/prompt-schema.json -d "$file" || exit 1
+          done
+
+      - name: Generate README
+        run: |
+          for dir in prompts/*/; do
+            if [ -f "$dir/prompt.json" ]; then
+              echo "Generating README for $dir..."
+              prompt_json=$(cat "$dir/prompt.json")
+              readme_content=$(echo "$prompt_json" | handlebars templates/README-template.md)
+              echo "$readme_content" > "$dir/README.md"
+            fi
+          done
+
+      - name: Check for Modifications to Existing Prompts
+        run: |
+          if git diff --name-only main...HEAD | grep -E '^prompts/(?!new-prompt/)'; then
+            echo "Error: Modifications to existing prompts are not allowed."
+            exit 1
+          fi
+
+      - name: Auto-populate Metadata Fields
+        run: |
+            for file in prompts/*/prompt.json; do
+            echo "Auto-populating metadata for $file..."
+            current_time=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+            tmp=$(mktemp)
+            jq --arg author "$GITHUB_ACTOR" \
+                --arg time "$current_time" \
+                '.metadata.author = $author |
+                .metadata.createdAt = $time |
+                .metadata.updatedAt = $time' "$file" > "$tmp" && mv "$tmp" "$file"
+            echo "Updated $file with metadata defaults."
+            done       
+
+      - name: Check for README Changes
+        id: check-readme
+        run: |
+          git diff --exit-code prompts/*/README.md || (echo "READMEs are not up to date. Please regenerate them using the provided template." && exit 1)
+
+      - name: Commit README Changes
+        if: failure() && steps.check-readme.outcome == 'failure'
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add prompts/*/README.md
+          git commit -m "Auto-generate READMEs based on prompt.json"
+          git push

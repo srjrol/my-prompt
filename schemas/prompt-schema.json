@@ -1,0 +1,148 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "definitions": {
+      "variable": {
+        "type": "object",
+        "description": "Defines a variable used in the prompt template.",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The name of the variable. Must be unique within the prompt."
+          },
+          "description": {
+            "type": "string",
+            "description": "A human-readable description of the variable's purpose."
+          },
+          "type": {
+            "enum": [
+              "string",
+              "number",
+              "boolean",
+              "array",
+              "object"
+            ],
+            "description": "The data type of the variable. Supported types: string, number, boolean, array, object."
+          },
+          "required": {
+            "type": "boolean",
+            "default": true,
+            "description": "Whether the variable is required. Defaults to true."
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "A list of allowed values for the variable (optional)."
+          }
+        },
+        "required": [
+          "name",
+          "description"
+        ]
+      }
+    },
+    "properties": {
+      "specVersion": {
+        "type": "string",
+        "pattern": "^\\d+\\.\\d+\\.\\d+$",
+        "description": "The version of the schema used. Must follow semantic versioning (e.g., 1.0.0)."
+      },
+      "metadata": {
+        "type": "object",
+        "description": "Metadata about the prompt.",
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]+$",
+            "description": "A URL-friendly name for the prompt. Must be lowercase and use hyphens instead of spaces."
+          },
+          "author": {
+            "type": "number",
+            "description": "The GitHub user ID of the author."
+          },
+          "description": {
+            "type": "string",
+            "description": "A brief description of the prompt's purpose and usage."
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "A list of tags to categorize the prompt (e.g., ['marketing', 'social-media'])."
+          },
+          "modelCompatibility": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "A list of AI models compatible with the prompt (e.g., ['gpt-4', 'claude-2'])."
+          },
+          "dependencies": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "A map of dependencies required by the prompt. Keys are dependency names, and values are version constraints."
+          },
+          "visibility": {
+            "type": "string",
+            "enum": [
+              "public",
+              "private"
+            ],
+            "description": "The visibility of the prompt. Can be 'public' or 'private'."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The timestamp when the prompt was created (ISO 8601 format)."
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The timestamp when the prompt was last updated (ISO 8601 format)."
+          }
+        },
+        "required": [
+          "name",
+          "author",
+          "description",
+          "visibility"
+        ]
+      },
+      "prompt": {
+        "type": "object",
+        "description": "The core content of the prompt.",
+        "properties": {
+          "template": {
+            "type": "string",
+            "description": "The template text of the prompt. Use {{variable}} syntax for placeholders."
+          },
+          "variables": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/variable"
+            },
+            "description": "A list of variables used in the template."
+          }
+        },
+        "required": [
+          "template"
+        ]
+      },
+      "extensions": {
+        "type": "object",
+        "additionalProperties": true,
+        "description": "A flexible object for future extensions. Can include experimental or custom fields."
+      }
+    },
+    "required": [
+      "specVersion",
+      "metadata",
+      "prompt"
+    ],
+    "description": "Schema for defining AI prompts. This schema ensures consistency and compatibility across all prompts in the repository."
+}

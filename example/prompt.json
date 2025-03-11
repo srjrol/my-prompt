@@ -1,0 +1,63 @@
+{
+  "specVersion": "1.0.0",
+  "metadata": {
+    "name": "blog-post-generator",
+    "description": "Generates a blog post based on a given topic and tone.",
+    "tags": [
+      "blogging",
+      "content-creation",
+      "seo"
+    ],
+    "modelCompatibility": [
+      "gpt-4",
+      "claude-2",
+      "bard"
+    ],
+    "dependencies": {},
+    "visibility": "public"
+  },
+  "prompt": {
+    "template": "Write a {tone} blog post about {topic}. The post should be approximately {wordCount} words long and include introduction, main content, and conclusion. Use markdown formatting for headings and lists.",
+    "variables": [
+      {
+        "name": "topic",
+        "description": "The main topic of the blog post.",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "tone",
+        "description": "The tone of the blog post.",
+        "type": "string",
+        "required": true,
+        "options": [
+          "professional",
+          "casual",
+          "informative",
+          "persuasive"
+        ]
+      },
+      {
+        "name": "wordCount",
+        "description": "The approximate length of the blog post in words.",
+        "type": "number",
+        "required": true,
+        "options": [
+          "500",
+          "1000",
+          "1500",
+          "2000"
+        ]
+      }
+    ]
+  },
+  "extensions": {
+    "seoKeywords": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "A list of SEO keywords to include in the blog post."
+    }
+  }
+}
