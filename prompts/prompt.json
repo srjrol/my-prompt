@@ -1,7 +1,7 @@
 {
   "specVersion": "1.0.0",
   "metadata": {
-    "name": "blog-post-generator",
+    "name": "blog-post-generatorx",
     "description": "Generates a blog post based on a given topic and tone.",
     "tags": [
       "blogging",
